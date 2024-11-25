@@ -93,9 +93,16 @@ impl eframe::App for Entry {
                         })
                 });
             });
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label("TEST");
-            ui.label("测试");
+        egui::CentralPanel::default().show(ctx, |ui| match &tag {
+            Tag::Portal => {
+                ui.label("TODO");
+            }
+            Tag::Items(_tree) => {
+                ui.label("TODO");
+            }
+            Tag::About => {
+                self.about_page_frame(ui);
+            }
         });
 
         ctx.request_repaint();
