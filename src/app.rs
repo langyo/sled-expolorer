@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::replace_fonts;
+use crate::theme::replace_fonts;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Tag {
@@ -41,6 +41,8 @@ impl Default for Entry {
 
 impl eframe::App for Entry {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        catppuccin_egui::set_theme(ctx, catppuccin_egui::MOCHA);
+
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.vertical_centered(|ui| {
                 ui.add_space(4.0);

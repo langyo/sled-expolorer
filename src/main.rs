@@ -2,6 +2,7 @@
 
 pub mod app;
 pub mod pages;
+pub mod theme;
 
 use anyhow::anyhow;
 use std::sync::Arc;
@@ -12,7 +13,7 @@ fn main() -> eframe::Result {
     env_logger::init();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([600., 400.])
+            .with_inner_size([800., 600.])
             .with_icon(Arc::new({
                 let icon = include_bytes!("../res/logo.png");
                 let icon = image::load_from_memory(icon).map_err(|err| {
@@ -34,28 +35,4 @@ fn main() -> eframe::Result {
         options,
         Box::new(|cc| Ok(Box::new(app::Entry::new(cc)))),
     )
-}
-
-pub fn replace_fonts(ctx: &egui::Context) {
-    let mut fonts = egui::FontDefinitions::default();
-
-    fonts.font_data.insert(
-        "汉仪文黑-85W".to_owned(),
-        egui::FontData::from_static(include_bytes!("../res/font.ttf")),
-    );
-
-    fonts
-        .families
-        .entry(egui::FontFamily::Proportional)
-        .and_modify(|families| {
-            families.insert(0, "汉仪文黑-85W".to_owned());
-        });
-    fonts
-        .families
-        .entry(egui::FontFamily::Monospace)
-        .and_modify(|families| {
-            families.insert(0, "汉仪文黑-85W".to_owned());
-        });
-
-    ctx.set_fonts(fonts);
 }
