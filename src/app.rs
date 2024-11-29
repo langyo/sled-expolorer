@@ -74,19 +74,31 @@ impl eframe::App for Entry {
                         ui.add_space(4.0);
                         ui.separator();
                         ui.add_space(4.0);
-                        if match &tag {
-                            Tag::Portal => false,
-                            _ => true,
-                        } {
-                            let mut val = true;
-                            ui.selectable_value(
-                                &mut val,
-                                true,
-                                match &tag {
-                                    Tag::Items(tree) => format!("#{tree}"),
-                                    _ => panic!("Unknown tag: {:?}", self.tag),
-                                },
-                            );
+                        // if match &tag {
+                        //     Tag::Portal => false,
+                        //     _ => true,
+                        // } {
+                        //     let mut val = true;
+                        //     ui.selectable_value(
+                        //         &mut val,
+                        //         true,
+                        //         match &tag {
+                        //             Tag::Items(tree) => format!("#{tree}"),
+                        //             _ => panic!("Unknown tag: {:?}", self.tag),
+                        //         },
+                        //     );
+                        // }
+
+                        // FIXME: Don't show this tag if the folder is not opened
+                        if ui
+                            .selectable_value(
+                                &mut tag,
+                                Tag::Items("<Default>".to_string()),
+                                "<Default>".to_string(),
+                            )
+                            .clicked()
+                        {
+                            self.tag.replace(Tag::Items("<Default>".to_string()));
                         }
                     });
                     egui::TopBottomPanel::bottom("drawer_tools")
