@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::theme::replace_fonts;
 
@@ -6,7 +6,6 @@ use crate::theme::replace_fonts;
 pub enum Tag {
     Portal,
     Items(String),
-    About,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -19,6 +18,8 @@ pub struct Entry {
     pub tag: Rc<RefCell<Tag>>,
     pub is_loading: Rc<RefCell<bool>>,
     pub bottom_message: Rc<RefCell<Option<BottomMessage>>>,
+
+    pub items: Rc<RefCell<HashMap<String, String>>>,
 }
 
 impl Entry {
@@ -35,6 +36,8 @@ impl Default for Entry {
             tag: Rc::new(RefCell::new(Tag::Portal)),
             is_loading: Rc::new(RefCell::new(false)),
             bottom_message: Rc::new(RefCell::new(None)),
+
+            items: Rc::new(RefCell::new(HashMap::new())),
         }
     }
 }
@@ -58,6 +61,7 @@ impl eframe::App for Entry {
             .default_width(128.0)
             .show(ctx, |ui| {
                 ui.vertical_centered(|ui| {
+                    ui.add_space(4.0);
                     ui.vertical_centered_justified(|ui| {
                         let mut tag = tag.clone();
                         if ui
@@ -66,15 +70,12 @@ impl eframe::App for Entry {
                         {
                             self.tag.replace(tag.clone());
                         }
-                        if ui.selectable_value(&mut tag, Tag::About, "About").clicked() {
-                            self.tag.replace(tag.clone());
-                        }
 
                         ui.add_space(4.0);
                         ui.separator();
                         ui.add_space(4.0);
                         if match &tag {
-                            Tag::Portal | Tag::About => false,
+                            Tag::Portal => false,
                             _ => true,
                         } {
                             let mut val = true;
@@ -91,19 +92,44 @@ impl eframe::App for Entry {
                     egui::TopBottomPanel::bottom("drawer_tools")
                         .resizable(false)
                         .show_inside(ui, |ui| {
-                            let _ = ui.button("Refresh");
+                            ui.add_space(4.0);
+                            ui.vertical_centered(|ui| {
+                                if let Some(bottom_message) = self.bottom_message.borrow().clone() {
+                                    match bottom_message {
+                                        BottomMessage::Info(message) => {
+                                            ui.label(message);
+                                        }
+                                        BottomMessage::Error(message) => {
+                                            ui.colored_label(egui::Color32::RED, message);
+                                        }
+                                    }
+                                    ui.add_space(4.0);
+                                }
+
+                                if ui.button("Save").clicked() {
+                                    self.bottom_message.replace(Some(BottomMessage::Info(
+                                        "Save clicked".to_string(),
+                                    )));
+                                }
+
+                                ui.add_space(4.0);
+
+                                if ui.button("Restore").clicked() {
+                                    self.bottom_message.replace(Some(BottomMessage::Info(
+                                        "Restore clicked".to_string(),
+                                    )));
+                                }
+                            });
+                            ui.add_space(4.0);
                         })
                 });
             });
         egui::CentralPanel::default().show(ctx, |ui| match &tag {
             Tag::Portal => {
-                ui.label("TODO");
+                self.portal_page_frame(ui);
             }
-            Tag::Items(_tree) => {
-                ui.label("TODO");
-            }
-            Tag::About => {
-                self.about_page_frame(ui);
+            Tag::Items(tree_key) => {
+                self.items_page_frame(ui, tree_key.clone());
             }
         });
 
